@@ -2,4 +2,4 @@
 
 Below is a diagram of the architecture:
 
-[AWS Diagram](./NotificationServiceAWSDiagram.png)
+![AWS Diagram](./NotificationServiceAWSDiagram.png)
