@@ -37,16 +37,13 @@ Resources:
       FunctionName: SNSComponentMessageSender
       CodeUri: .
       Handler: functions/message-sender/src/app.lambda_handler
-      Environment:
-        Variables:
-          VAR1: hi
       Events:
         NewMessage:
           Type: SQS
           Properties:
             BatchSize: 10
             Enabled: True
-            Queue: !Fn::GetAtt [MessageQueue, "Arn"]
+            Queue: !GetAtt MessageQueue.Arn
 
   SNSManager:
     Type: AWS::Serverless::Function
@@ -58,8 +55,7 @@ Resources:
         ApiEvent:
           Type: Api
           Properties:
-            ApiFunctionAuth:
-              ApiKeyRequired: False
+            Auth:
               ResourcePolicyStatement:
                 IpRangeBlacklist:
                   - "*"
