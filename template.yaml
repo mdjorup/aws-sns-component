@@ -4,6 +4,17 @@ Description: >
   AWS SNS Component
 
 
+Globals:
+  Api:
+    TracingEnabled: true
+    Cors: # see CORS section
+      AllowHeaders: "'*'"
+      AllowOrigin: "'*'"
+
+  Function:
+    Timeout: 5
+    Runtime: python3.9
+    Tracing: Active
 
 Resources:
 
