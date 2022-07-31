@@ -85,7 +85,8 @@ Resources:
   ChangeLog:
     Type: AWS::DynamoDB::Table
     Properties:
-      BillingMode: Provisioned
+      TableName: SNSUpdateTable
+      BillingMode: PROVISIONED
       ProvisionedThroughput:
         ReadCapacityUnits: 25
         WriteCapacityUnits: 25
