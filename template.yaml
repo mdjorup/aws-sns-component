@@ -56,7 +56,7 @@ Resources:
           Type: Api
           Properties:
             Auth:
-              ResourcePolicyStatement:
+              ResourcePolicy:
                 IpRangeBlacklist:
                   - "*"
                 IpRangeWhitelist:
