@@ -1,0 +1,2 @@
+Controlling access to api through resource policy
+https://aws.amazon.com/premiumsupport/knowledge-center/api-gateway-resource-policy-access/
