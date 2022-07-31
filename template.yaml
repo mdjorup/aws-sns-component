@@ -1,0 +1,62 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  AWS SNS Component
+
+
+
+Resources:
+
+  MessageQueue:
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName: SNSComponentMessageQueue
+
+
+  # UpdateQueue:
+  #   Type: AWS::SQS::Queue
+  #   Properties:
+  #     QueueName: SNSComponentUpdateQueue
+
+  # 72.83.171.80
+
+  MessageSender:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: SNSComponentMessageSender
+      CodeUri: .
+      Handler: functions/message-sender/src/app.lambda_handler
+      Environment:
+        Variables:
+          VAR1: hi
+      Events:
+        NewMessage:
+          Type: SQS
+          Properties:
+            BatchSize: 10
+            Enabled: True
+            Queue: !Fn::GetAtt [MessageQueue, "Arn"]
+
+  SNSManager:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: SNSComponentSNSManager
+      CodeUri: .
+      Handler: functions/sns-manager/src/app.lambda_handler
+      Events: 
+        ApiEvent:
+          Type: Api
+          Properties:
+            ApiFunctionAuth:
+              ApiKeyRequired: False
+              ResourcePolicyStatement:
+                IpRangeBlacklist:
+                  - "*"
+                IpRangeWhitelist:
+                  - "72.83.171.80"
+            Method: ANY
+            Path: /{path+}
+
+      # Events: this should reference the queue
+
+
