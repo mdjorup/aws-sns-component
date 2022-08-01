@@ -45,6 +45,7 @@ Resources:
             Enabled: True
             Queue: !GetAtt MessageQueue.Arn
 
+
   SNSManager:
     Type: AWS::Serverless::Function
     Properties:
@@ -63,7 +64,18 @@ Resources:
                   - "72.83.171.80"
             Method: ANY
             Path: /{path+}
-  
+      Policies:
+        - AmazonSNSFullAccess
+        - Version: "2012-10-17"
+          Statement: 
+            - Effect: "Allow"
+              Action:
+                - sqs:SendMessage
+                - sqs:GetQueueAttributes
+              Resource: 
+                - !GetAtt MessageQueue.Arn
+                - !GetAtt UpdateQueue.Arn
+
   UpdateLogger:
     Type: AWS::Serverless::Function
     Properties:
@@ -77,6 +89,16 @@ Resources:
             BatchSize: 10
             Enabled: True
             Queue: !GetAtt UpdateQueue.Arn
+      Policies:
+        Version: "2012-10-17"
+        Statement: 
+          - Effect: "Allow"
+            Action:
+              - dynamodb:PutItem
+              - dynamodb:BatchWriteItem
+              - dynamodb:GetItem
+            Resource: 
+              - !GetAtt ChangeLog.Arn
 
   #need
   #dynamo
