@@ -3,7 +3,6 @@ Transform: AWS::Serverless-2016-10-31
 Description: >
   AWS SNS Component
 
-
 Globals:
   Api:
     TracingEnabled: true
@@ -12,11 +11,32 @@ Globals:
       AllowOrigin: "'*'"
 
   Function:
-    Timeout: 5
+    Timeout: 15
     Runtime: python3.9
     Tracing: Active
 
+Parameters:
+  Env:
+    Description: Environment.
+    Default: local
+    Type: String
+    AllowedValues:
+      - local
+      - dev
+
+Conditions: 
+  CreateSharedLayer: !Equals 
+    - !Ref Env
+    - local
+
 Resources:
+  SharedLayer:
+    Type: AWS::Serverless::LayerVersion
+    Condition: CreateSharedLayer
+    Properties:
+      ContentUri: shared/
+      CompatibleRuntimes:
+        - python3.9
 
   MessageQueue:
     Type: AWS::SQS::Queue
@@ -36,7 +56,7 @@ Resources:
     Properties:
       FunctionName: SNSComponentMessageSender
       CodeUri: .
-      Handler: functions/message-sender/src/app.lambda_handler
+      Handler: functions/message_sender/src/app.lambda_handler
       Events:
         NewMessage:
           Type: SQS
@@ -51,7 +71,9 @@ Resources:
     Properties:
       FunctionName: SNSComponentSNSManager
       CodeUri: .
-      Handler: functions/sns-manager/src/app.lambda_handler
+      Handler: functions/sns_manager/src/app.lambda_handler
+      # Layers:
+      #   - 'Fn::If': [!Ref SharedLayer
       Environment:
         Variables:
           LOG_LEVEL: INFO
@@ -86,7 +108,7 @@ Resources:
     Properties:
       FunctionName: SNSComponentUpdateLogger
       CodeUri: .
-      Handler: functions/update-logger/src/app.lambda-handler
+      Handler: functions/update_logger/src/app.lambda-handler
       Events:
         NewMessage:
           Type: SQS

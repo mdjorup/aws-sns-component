@@ -1,3 +1,4 @@
 .vscode/
 venv/
 .aws-sam
+shared/
