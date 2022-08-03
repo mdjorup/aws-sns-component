@@ -62,11 +62,17 @@ def get_topics():
 
     topic_objects = sns_resource.topics.all()
 
-    topic_names = []
+    topics = []
     for topic in topic_objects:
-        item = {"name": topic.arn}
+        attributes = topic.attributes
+        item = {
+            "name": attributes.DisplayName,
+            "arn": topic.arn,
+            "subscriptions_confirmed": attributes.SubscriptionsConfirmed,
+        }
+        topics.append(item)
 
-    return
+    return build_response(200, {"topics": topics})
 
 
 @app.get("/topics/<topic_arn>")
