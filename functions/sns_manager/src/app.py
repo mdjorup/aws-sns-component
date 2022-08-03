@@ -1,44 +1,71 @@
 import json
+import os
 
+import boto3
 from aws_lambda_powertools import Logger, Tracer
 from aws_lambda_powertools.event_handler import APIGatewayRestResolver
 from aws_lambda_powertools.logging import correlation_paths
 from aws_lambda_powertools.utilities.typing import LambdaContext
 from aws_lambda_powertools.event_handler.api_gateway import Response
 from aws_lambda_powertools.event_handler import content_types
+from aws_lambda_powertools.event_handler.exceptions import NotFoundError
 from aws_lambda_powertools.middleware_factory import lambda_handler_decorator
 
+from functions.sns_manager.src.utils import build_response
 
 tracer = Tracer()
 logger = Logger()
 app = APIGatewayRestResolver()
 
 
-@app.exception_handler
+logger = Logger(
+    level=os.environ.get("LOG_LEVEL", "INFO"),
+    service=os.environ.get("POWERTOOLS_SERVICE_NAME", "lambda_auth"),
+)
+
+
+sns_resource = boto3.resource("sns", endpoint_url=os.environ.get("SNS_ENDPOINT_URL"))
+
+
+@app.exception_handler(Exception)
 @tracer.capture_method
-def exception_handler():
-    return
+def exception_handler(ex: Exception):
+    logger.warning(f"There was an uncaught exception: {str(ex)}")
+    return build_response(
+        500, {"message": "There was an uncaught exception", "error": str(ex)}
+    )
 
 
 @app.not_found
 @tracer.capture_method
-def not_found():
-    return
+def not_found(ex: NotFoundError):
+    method = app.current_event.http_method
+    path = app.current_event.path
+    logger.info(f"Route {method} {path} not found")
+    return build_response(
+        404,
+        {
+            "message": f"Route {method} {path} not found",
+            "error": str(ex),
+        },
+    )
 
 
 @app.get("/health")
-@tracer.capture_method
 def health():
-    return Response(
-        status_code=200,
-        content_type=content_types.APPLICATION_JSON,
-        body=json.dumps({"message": "ok"}),
-    )
+    return build_response(200, {"message": "ok"})
 
 
 @app.get("/topics")
 @tracer.capture_method
 def get_topics():
+
+    topic_objects = sns_resource.topics.all()
+
+    topic_names = []
+    for topic in topic_objects:
+        item = {"name": topic.arn}
+
     return
 
 

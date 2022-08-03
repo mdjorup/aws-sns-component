@@ -52,6 +52,11 @@ Resources:
       FunctionName: SNSComponentSNSManager
       CodeUri: .
       Handler: functions/sns-manager/src/app.lambda_handler
+      Environment:
+        Variables:
+          LOG_LEVEL: INFO
+          POWERTOOLS_SERVICE_NAME: sns_manager
+          SNS_ENDPOINT_URL: https://sns.us-east-1.amazonaws.com
       Events: 
         ApiEvent:
           Type: Api
