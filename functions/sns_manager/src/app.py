@@ -9,7 +9,9 @@ from aws_lambda_powertools.utilities.typing import LambdaContext
 from aws_lambda_powertools.event_handler.exceptions import NotFoundError
 from aws_lambda_powertools.middleware_factory import lambda_handler_decorator
 
-from functions.sns_manager.src.utils import build_response
+from functions.sns_manager.src.utils.response_utils import build_response
+
+from functions.sns_manager.src.utils.implementations import *
 
 tracer = Tracer()
 logger = Logger()
@@ -58,31 +60,27 @@ def health():
 @tracer.capture_method
 def get_topics():
 
-    topic_objects = sns_resource.topics.all()
+    response = get_topics_response(sns_resource)
 
-    topics = []
-    for topic in topic_objects:
-        attributes = topic.attributes
-        item = {
-            "name": attributes.DisplayName,
-            "arn": topic.arn,
-            "subscriptions_confirmed": attributes.SubscriptionsConfirmed,
-        }
-        topics.append(item)
-
-    return build_response(200, {"topics": topics})
+    return response
 
 
 @app.get("/topics/<topic_arn>")
 @tracer.capture_method
 def get_topic_info(topic_arn):
-    return
+
+    response = get_topic_info_response(sns_resource, topic_arn)
+
+    return response
 
 
 @app.get("/topics/<topic_arn>/subscribers")
 @tracer.capture_method
 def get_subcribers_of_topic(topic_arn):
-    return
+
+    response = get_subcribers_of_topic_response(sns_resource, topic_arn)
+
+    return response
 
 
 @app.post("/topics")
