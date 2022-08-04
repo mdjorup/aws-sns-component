@@ -60,6 +60,6 @@ def create_topic_response(sns_resource, request_body):
         200,
         {
             "message": "Successfully created topic",
-            "topic": {"arn": topic.arn, "attributes": topic.attribues},
+            "topic": {"arn": topic.arn, "attributes": topic.attributes},
         },
     )

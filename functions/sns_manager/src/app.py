@@ -69,6 +69,8 @@ def get_topics():
 @tracer.capture_method
 def get_topic_info(topic_arn):
 
+    logger.info(f"Getting information for topic {topic_arn}")
+
     response = get_topic_info_response(sns_resource, topic_arn)
 
     return response
@@ -77,6 +79,8 @@ def get_topic_info(topic_arn):
 @app.get("/topics/<topic_arn>/subscribers")
 @tracer.capture_method
 def get_subcribers_of_topic(topic_arn):
+
+    logger.info(f"Getting subscribers for topic {topic_arn}")
 
     response = get_subcribers_of_topic_response(sns_resource, topic_arn)
 
@@ -87,7 +91,9 @@ def get_subcribers_of_topic(topic_arn):
 @tracer.capture_method
 def create_topic():
 
-    request_body = json.loads(app.current_event.json_body)
+    logger.info("Attempting to create topic")
+
+    request_body = app.current_event.json_body
 
     response = create_topic_response(sns_resource, request_body)
 
