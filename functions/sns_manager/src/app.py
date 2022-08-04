@@ -86,7 +86,12 @@ def get_subcribers_of_topic(topic_arn):
 @app.post("/topics")
 @tracer.capture_method
 def create_topic():
-    return
+
+    request_body = json.loads(app.current_event.json_body)
+
+    response = create_topic_response(sns_resource, request_body)
+
+    return response
 
 
 @app.post("/topics/<topic_arn>/subscribe")

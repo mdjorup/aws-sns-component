@@ -35,3 +35,31 @@ def get_subcribers_of_topic_response(sns_resource, topic_arn):
     return build_response(
         200, {"arn": topic.arn, "subscriptions": topic.subscriptions.all()}
     )
+
+
+def create_topic_response(sns_resource, request_body):
+
+    topic_name = request_body.get("name")
+
+    if not request_body or not topic_name:
+        return build_response(
+            400, {"error": "Invalid request body", "message": "Please provide a 'name'"}
+        )
+
+    try:
+        topic = sns_resource.create_topic(Name=topic_name)
+    except Exception as ex:
+        return build_response(
+            500, {"error": str(ex), "message": "There was an error creating the topic"}
+        )
+
+    if not topic:
+        return build_response(500, {"message": "There was an error creating the topic"})
+
+    return build_response(
+        200,
+        {
+            "message": "Successfully created topic",
+            "topic": {"arn": topic.arn, "attributes": topic.attribues},
+        },
+    )
