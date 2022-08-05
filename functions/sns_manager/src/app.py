@@ -1,4 +1,4 @@
-import json
+from distutils.command import build
 import os
 
 import boto3
@@ -9,8 +9,10 @@ from aws_lambda_powertools.utilities.typing import LambdaContext
 from aws_lambda_powertools.event_handler.exceptions import NotFoundError
 from aws_lambda_powertools.middleware_factory import lambda_handler_decorator
 
-from functions.sns_manager.src.utils.response_utils import build_response
-
+from functions.sns_manager.src.utils.response_utils import (
+    build_response,
+    build_json_message,
+)
 from functions.sns_manager.src.utils.implementations import *
 
 tracer = Tracer()
@@ -30,9 +32,9 @@ sns_resource = boto3.resource("sns", endpoint_url=os.environ.get("SNS_ENDPOINT_U
 @app.exception_handler(Exception)
 @tracer.capture_method
 def exception_handler(ex: Exception):
-    logger.warning(f"There was an uncaught exception: {str(ex)}")
+    logger.error(build_json_message("There was an uncaught exception", error=str(ex)))
     return build_response(
-        500, {"message": "There was an uncaught exception", "error": str(ex)}
+        500, build_json_message("There was an uncaught exception", error=str(ex))
     )
 
 
@@ -41,24 +43,23 @@ def exception_handler(ex: Exception):
 def not_found(ex: NotFoundError):
     method = app.current_event.http_method
     path = app.current_event.path
-    logger.info(f"Route {method} {path} not found")
+    logger.info(build_json_message(f"Route {method} {path} not found", error=str(ex)))
     return build_response(
         404,
-        {
-            "message": f"Route {method} {path} not found",
-            "error": str(ex),
-        },
+        build_json_message(f"Route {method} {path} not found", error=str(ex)),
     )
 
 
 @app.get("/health")
 def health():
-    return build_response(200, {"message": "OK"})
+    return build_response(200, build_json_message("OK"))
 
 
 @app.get("/topics")
 @tracer.capture_method
 def get_topics():
+
+    logger.info(build_json_message("Getting all topics"))
 
     response = get_topics_response(sns_resource)
 
@@ -69,7 +70,7 @@ def get_topics():
 @tracer.capture_method
 def get_topic_info(topic_arn):
 
-    logger.info(f"Getting information for topic {topic_arn}")
+    logger.info(build_json_message(f"Getting information for topic {topic_arn}"))
 
     response = get_topic_info_response(sns_resource, topic_arn)
 
@@ -80,7 +81,7 @@ def get_topic_info(topic_arn):
 @tracer.capture_method
 def get_subcribers_of_topic(topic_arn):
 
-    logger.info(f"Getting subscribers for topic {topic_arn}")
+    logger.info(build_json_message(f"Getting subscribers for topic {topic_arn}"))
 
     response = get_subcribers_of_topic_response(sns_resource, topic_arn)
 
@@ -91,7 +92,7 @@ def get_subcribers_of_topic(topic_arn):
 @tracer.capture_method
 def create_topic():
 
-    logger.info("Attempting to create topic")
+    logger.info(build_json_message("Attempting to create topic"))
 
     request_body = app.current_event.json_body
 
@@ -103,12 +104,18 @@ def create_topic():
 @app.post("/topics/<topic_arn>/subscribe")
 @tracer.capture_method
 def subscribe(topic_arn):
+
+    logger.info(build_json_message(f"Getting all subscribers for topic {topic_arn}"))
+
     return
 
 
 @app.post("/topics/<topic_arn>/publish")
 @tracer.capture_method
 def publish_message(topic_arn):
+
+    logger.info(build_json_message(f"Publishing message to topic {topic_arn}"))
+
     return
 
 

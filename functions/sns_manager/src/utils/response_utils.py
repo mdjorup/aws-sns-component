@@ -14,3 +14,10 @@ def build_response(status_code, body):
         content_type=content_types.APPLICATION_JSON,
         body=json.dumps(body),
     )
+
+
+def build_json_message(message, *args, **kwargs):
+
+    json_message = {"message": message, **kwargs}
+
+    return json_message
