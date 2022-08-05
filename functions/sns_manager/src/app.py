@@ -122,19 +122,38 @@ def publish_message(topic_arn):
 @app.put("/topics/<topic_arn>/unsubscribe")
 @tracer.capture_method
 def unsubscribe(topic_arn):
+
+    request_body = app.current_event.json_body
+
+    subscription = request_body.get("subscription")
+
+    logger.info(
+        build_json_message(f"Unsubscribing {subscription} from topic {topic_arn}")
+    )
+
     return
 
 
 @app.delete("/topics/<topic_arn>")
 @tracer.capture_method
 def delete_topic(topic_arn):
+
+    logger.info(build_json_message(f"Deleting topic {topic_arn}"))
     return
 
 
 @lambda_handler_decorator
 def middleware(handler, event, context: LambdaContext):
 
+    ip_address = event.get("headers", {}).get("X-Forwarded-For", "UNK")
+
+    logger.append_keys(ip_address=ip_address)
+
+    # before logic - authorization
+
     handler_return = handler(event, context)
+
+    # after logic - send changes to the update queue
 
     return handler_return
 
@@ -143,9 +162,5 @@ def middleware(handler, event, context: LambdaContext):
 @tracer.capture_lambda_handler
 @middleware
 def lambda_handler(event, context: LambdaContext):
-
-    ip_address = event.get("headers", {}).get("X-Forwarded-For", "UNK")
-
-    logger.append_keys(ip_address=ip_address)
 
     return app.resolve(event, context)
