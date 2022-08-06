@@ -84,11 +84,8 @@ Resources:
           Type: Api
           Properties:
             Auth:
-              ResourcePolicy:
-                IpRangeBlacklist:
-                  - "*"
-                IpRangeWhitelist:
-                  - "72.83.171.80"
+              ApiKeyRequired: True
+              Authorizer: None
             Method: ANY
             Path: /{path+}
       Policies:
