@@ -3,10 +3,8 @@ from functions.sns_manager.src.utils.response_utils import (
     build_json_message,
 )
 
-from functions.sns_manager.src.app import logger
 
-
-def get_topics_response(sns_resource, logger=logger):
+def get_topics_response(sns_resource, logger):
     topic_objects = sns_resource.topics.all()
 
     topics = []
@@ -17,7 +15,7 @@ def get_topics_response(sns_resource, logger=logger):
     return build_response(200, build_json_message("Success", topcis=topics))
 
 
-def get_topic_info_response(sns_resource, topic_arn, logger=logger):
+def get_topic_info_response(sns_resource, topic_arn, logger):
     topic_objects = sns_resource.topics.all()
 
     my_topic = sns_resource.Topic(topic_arn)
@@ -33,7 +31,7 @@ def get_topic_info_response(sns_resource, topic_arn, logger=logger):
     return build_response(200, build_json_message("Success", topic=topic_info))
 
 
-def get_subcribers_of_topic_response(sns_resource, topic_arn, logger=logger):
+def get_subcribers_of_topic_response(sns_resource, topic_arn, logger):
 
     topic = sns_resource.Topic(topic_arn)
 
@@ -48,7 +46,7 @@ def get_subcribers_of_topic_response(sns_resource, topic_arn, logger=logger):
     )
 
 
-def create_topic_response(sns_resource, request_body, logger=logger):
+def create_topic_response(sns_resource, request_body, logger):
 
     topic_name = request_body.get("name")
 

@@ -12,7 +12,12 @@ from functions.sns_manager.src.utils.response_utils import (
     build_response,
     build_json_message,
 )
-from functions.sns_manager.src.utils.implementations import *
+from functions.sns_manager.src.utils.implementations import (
+    get_topics_response,
+    get_topic_info_response,
+    get_subcribers_of_topic_response,
+    create_topic_response,
+)
 
 tracer = Tracer()
 logger = Logger()
@@ -51,7 +56,7 @@ def not_found(ex: NotFoundError):
 
 @app.get("/health")
 def health():
-    return build_response(200, build_json_message("OK"))
+    return build_response(200, build_json_message("OKKKKKKK"))
 
 
 @app.get("/topics")
@@ -60,7 +65,7 @@ def get_topics():
 
     logger.info(build_json_message("Getting all topics"))
 
-    response = get_topics_response(sns_resource)
+    response = get_topics_response(sns_resource, logger)
 
     return response
 
@@ -71,7 +76,7 @@ def get_topic_info(topic_arn):
 
     logger.info(build_json_message(f"Getting information for topic {topic_arn}"))
 
-    response = get_topic_info_response(sns_resource, topic_arn)
+    response = get_topic_info_response(sns_resource, topic_arn, logger)
 
     return response
 
@@ -82,7 +87,7 @@ def get_subcribers_of_topic(topic_arn):
 
     logger.info(build_json_message(f"Getting subscribers for topic {topic_arn}"))
 
-    response = get_subcribers_of_topic_response(sns_resource, topic_arn)
+    response = get_subcribers_of_topic_response(sns_resource, topic_arn, logger)
 
     return response
 
@@ -95,7 +100,7 @@ def create_topic():
 
     request_body = app.current_event.json_body
 
-    response = create_topic_response(sns_resource, request_body)
+    response = create_topic_response(sns_resource, request_body, logger)
 
     return response
 
@@ -109,7 +114,7 @@ def subscribe(topic_arn):
     return
 
 
-@app.post("/topics/<topic_arn>/publish")
+@app.post("/topics/<topic_arn>")
 @tracer.capture_method
 def publish_message(topic_arn):
 
