@@ -126,3 +126,51 @@ def subscribe_response(sns_resource, topic_arn, request_body, logger):
         200,
         build_json_message("Subscripton created, not yet confirmed"),
     )
+
+
+def publish_message_response(sns_resource, topic_arn, request_body, logger):
+
+    message = request_body.get("message")
+    subject = request_body.get("subject")
+
+    if not message or not subject:
+        logger.debug("Invalid request body")
+        return build_response(
+            400,
+            build_json_message(
+                "Please provide a message and a subject",
+                error="Invalid request body",
+            ),
+        )
+    if not isinstance(message, str) or not isinstance(subject, str):
+        logger.debug("Invalid request body")
+        return build_response(
+            400,
+            build_json_message(
+                "Please ensure that message and subject are strings",
+                error="Invalid request body",
+            ),
+        )
+
+    topic = sns_resource.Topic(topic_arn)
+
+    if not topic:
+        logger.debug("Invalid topic arn provided")
+        return build_response(
+            400,
+            build_json_message(
+                "Please provide a valid topic arn",
+                error="Invalid topic arn in query parameters",
+            ),
+        )
+
+    response = topic.publish(Message=message, Subject=subject)
+
+    logger.info(f"Published message to topic {topic_arn}")
+
+    return build_response(
+        200,
+        build_json_message(
+            "Published message to topic", topic_arn=topic_arn, response=response
+        ),
+    )

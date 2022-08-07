@@ -17,6 +17,7 @@ from functions.sns_manager.src.utils.implementations import (
     get_topic_info_response,
     get_subcribers_of_topic_response,
     create_topic_response,
+    publish_message_response,
     subscribe_response,
 )
 
@@ -125,9 +126,13 @@ def subscribe(topic_arn):
 @tracer.capture_method
 def publish_message(topic_arn):
 
+    request_body = app.current_event.json_body
+
     logger.info(build_json_message(f"Publishing message to topic {topic_arn}"))
 
-    return
+    response = publish_message_response(sns_resource, topic_arn, request_body, logger)
+
+    return response
 
 
 @app.put("/topics/<topic_arn>/unsubscribe")
