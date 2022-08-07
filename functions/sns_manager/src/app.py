@@ -17,6 +17,7 @@ from functions.sns_manager.src.utils.implementations import (
     get_topic_info_response,
     get_subcribers_of_topic_response,
     create_topic_response,
+    subscribe_response,
 )
 
 tracer = Tracer()
@@ -56,7 +57,7 @@ def not_found(ex: NotFoundError):
 
 @app.get("/health")
 def health():
-    return build_response(200, build_json_message("OKKKKKKK"))
+    return build_response(200, build_json_message("OK"))
 
 
 @app.get("/topics")
@@ -109,9 +110,15 @@ def create_topic():
 @tracer.capture_method
 def subscribe(topic_arn):
 
-    logger.info(build_json_message(f"Getting all subscribers for topic {topic_arn}"))
+    request_body = app.current_event.json_body
 
-    return
+    logger.info(
+        build_json_message(f"Subscribing to topic {topic_arn}", body=request_body)
+    )
+
+    response = subscribe_response(sns_resource, topic_arn, request_body, logger)
+
+    return response
 
 
 @app.post("/topics/<topic_arn>")

@@ -72,8 +72,8 @@ Resources:
       FunctionName: SNSComponentSNSManager
       CodeUri: .
       Handler: functions/sns_manager/src/app.lambda_handler
-      # Layers:
-      #   - 'Fn::If': [!Ref SharedLayer
+      Layers:
+        - !Ref SharedLayer
       Environment:
         Variables:
           LOG_LEVEL: INFO
