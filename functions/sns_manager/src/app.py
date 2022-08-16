@@ -126,11 +126,14 @@ def subscribe(topic_arn):
 @tracer.capture_method
 def publish_message(topic_arn):
 
+    sqs_resource = boto3.resource("sqs")
+    queue = sqs_resource.Queue(os.environ.get("SQS_MESSAGE_ENDPOINT_URL"))
+
     request_body = app.current_event.json_body
 
     logger.info(build_json_message(f"Publishing message to topic {topic_arn}"))
 
-    response = publish_message_response(sns_resource, topic_arn, request_body, logger)
+    response = publish_message_response(queue, topic_arn, request_body, logger)
 
     return response
 

@@ -43,12 +43,6 @@ Resources:
     Properties:
       QueueName: SNSComponentMessageQueue
 
-
-  UpdateQueue:
-    Type: AWS::SQS::Queue
-    Properties:
-      QueueName: SNSComponentUpdateQueue
-
   # 72.83.171.80
 
   MessageSender:
@@ -79,6 +73,8 @@ Resources:
           LOG_LEVEL: INFO
           POWERTOOLS_SERVICE_NAME: sns_manager
           SNS_ENDPOINT_URL: https://sns.us-east-1.amazonaws.com
+          SQS_MESSAGE_ENDPOINT_URL: https://sqs.us-east-1.amazonaws.com/057856323501/SNSComponentMessageQueue
+
       Events: 
         ApiEvent:
           Type: Api
@@ -97,55 +93,6 @@ Resources:
                 - !GetAtt MessageQueue.Arn
                 - !GetAtt UpdateQueue.Arn
 
-  UpdateLogger:
-    Type: AWS::Serverless::Function
-    Properties:
-      FunctionName: SNSComponentUpdateLogger
-      CodeUri: .
-      Handler: functions/update_logger/src/app.lambda-handler
-      Events:
-        NewMessage:
-          Type: SQS
-          Properties:
-            BatchSize: 10
-            Enabled: True
-            Queue: !GetAtt UpdateQueue.Arn
-      Policies:
-        Version: "2012-10-17"
-        Statement: 
-          - Effect: "Allow"
-            Action:
-              - dynamodb:PutItem
-              - dynamodb:BatchWriteItem
-              - dynamodb:GetItem
-            Resource: 
-              - !GetAtt ChangeLog.Arn
-
-  #need
-  #dynamo
-  #sns
-
-  ChangeLog:
-    Type: AWS::DynamoDB::Table
-    Properties:
-      TableName: SNSUpdateTable
-      BillingMode: PROVISIONED
-      ProvisionedThroughput:
-        ReadCapacityUnits: 25
-        WriteCapacityUnits: 25
-      TimeToLiveSpecification:
-        Enabled: True
-        AttributeName: "ttl"
-      KeySchema: 
-        - AttributeName: resource_arn
-          KeyType: HASH
-        - AttributeName: timestamp
-          KeyType: RANGE
-      AttributeDefinitions:
-        - AttributeName: resource_arn
-          AttributeType: S
-        - AttributeName: timestamp
-          AttributeType: S
 
   
 

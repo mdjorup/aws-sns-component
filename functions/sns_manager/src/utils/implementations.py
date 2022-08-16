@@ -128,7 +128,7 @@ def subscribe_response(sns_resource, topic_arn, request_body, logger):
     )
 
 
-def publish_message_response(sns_resource, topic_arn, request_body, logger):
+def publish_message_response(queue, topic_arn, request_body, logger):
 
     message = request_body.get("message")
     subject = request_body.get("subject")
@@ -152,21 +152,11 @@ def publish_message_response(sns_resource, topic_arn, request_body, logger):
             ),
         )
 
-    topic = sns_resource.Topic(topic_arn)
+    response = queue.send_message(
+        MessageBody={"topic_arn": topic_arn, "subject": subject, "message": message}
+    )
 
-    if not topic:
-        logger.debug("Invalid topic arn provided")
-        return build_response(
-            400,
-            build_json_message(
-                "Please provide a valid topic arn",
-                error="Invalid topic arn in query parameters",
-            ),
-        )
-
-    response = topic.publish(Message=message, Subject=subject)
-
-    logger.info(f"Published message to topic {topic_arn}")
+    logger.info("Published message to queue")
 
     return build_response(
         200,
