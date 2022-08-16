@@ -51,6 +51,12 @@ Resources:
       FunctionName: SNSComponentMessageSender
       CodeUri: .
       Handler: functions/message_sender/src/app.lambda_handler
+      Environment:
+        Variables:
+          LOG_LEVEL: INFO
+          POWERTOOLS_SERVICE_NAME: sns_message_sender
+          SQS_ENDPOINT_URL: https://sqs.us-east-1.amazonaws.com
+          SNS_ENDPOINT_URL: https://sns.us-east-1.amazonaws.com
       Events:
         NewMessage:
           Type: SQS
@@ -73,6 +79,7 @@ Resources:
           LOG_LEVEL: INFO
           POWERTOOLS_SERVICE_NAME: sns_manager
           SNS_ENDPOINT_URL: https://sns.us-east-1.amazonaws.com
+          SQS_ENDPOINT_URL: https://sqs.us-east-1.amazonaws.com
           SQS_MESSAGE_ENDPOINT_URL: https://sqs.us-east-1.amazonaws.com/057856323501/SNSComponentMessageQueue
 
       Events: 
