@@ -138,27 +138,19 @@ def publish_message(topic_arn):
     return response
 
 
-@app.put("/topics/<topic_arn>/unsubscribe")
-@tracer.capture_method
-def unsubscribe(topic_arn):
-
-    request_body = app.current_event.json_body
-
-    subscription = request_body.get("subscription")
-
-    logger.info(
-        build_json_message(f"Unsubscribing {subscription} from topic {topic_arn}")
-    )
-
-    return
-
-
 @app.delete("/topics/<topic_arn>")
 @tracer.capture_method
 def delete_topic(topic_arn):
 
     logger.info(build_json_message(f"Deleting topic {topic_arn}"))
-    return
+
+    topic = sns_resource.Topic(topic_arn)
+    topic.delete()
+
+    return build_response(
+        200,
+        build_json_message("Successfully deleted topic", topic_arn=topic_arn),
+    )
 
 
 @lambda_handler_decorator
