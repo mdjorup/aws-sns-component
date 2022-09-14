@@ -26,7 +26,7 @@ def lambda_handler(event: SQSEvent, context):
 
         if not topic_arn:
             logger.info("Could not find topic in request body")
-            return
+            continue
 
         topic = sns_resource.Topic(topic_arn)
 
